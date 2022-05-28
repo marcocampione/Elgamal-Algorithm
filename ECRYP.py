@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import random
 from math import pow
+import os
 
 
 #Encryption function which multiplies message (int) with g^(ab).
@@ -130,9 +131,10 @@ def gen_key(p):
 
 
 def main():
-    print("Please enter a string to be encrypted: ")
-    message = input() #FIRST INPUT FOR THE PROGRAM: plaintext message.
-    
+
+    #output .txt file for the testing.
+    output_file = open("output_text.txt",'w')
+
     #choosing prime number between 10^2-10^5.
     p = random.randint(pow(10, 2), pow(10, 5))
     while(True):
@@ -140,44 +142,99 @@ def main():
             break
         else:
             p = random.randint(pow(10, 2), pow(10, 5))
-
+    
     #choosing generator in the field p.
     g = generator(p)
     print("\nIn the field: ", p, "\nwe found a the generator: ", g)
+    output_file.write("In the field: "+ str(p)+ "\nwe found a the generator: "+ str(g))
     
-
     rec_key = gen_key(p) # Public key
     g_power_a = power(g, rec_key, p)
 
     print("the public key: ", rec_key)
+    output_file.write("\nthe public key: "+ str(rec_key))
+
     print("g to the power of a: ", g_power_a)
+    output_file.write("\ng to the power of a: "+ str(g_power_a))
 
     send_key = gen_key(p)# Private key
     g_power_b = power(g, send_key, p)  
 
     print("the private key: ", send_key)
+    output_file.write("\nthe private key: "+ str(send_key))
+
     print("g to the power b: ", g_power_b)
+    output_file.write("\ng to the power b: "+ str(g_power_b))
 
 
     g_power_ab = power(g_power_a, send_key, p)
     print("g to the power of ab:", g_power_ab, "\n")
+    output_file.write("\ng to the power of ab:"+ str(g_power_ab)+ "\n")
 
     while(True):
-        print("Please choose a ciphering mode:\n1 ECB\n2 CBC\n3 Exit program")
-        cipher_mode = input() #SECOND INPUT OF THE PROGRAM: choosing the ciphering mode.
+
+        print("Please choose input type:\n1 Keyboard Input\n2 File Input (input.txt)\n3 Exit program")
+        input_type = input() #FIRST INPUT FOR THE PROGRAM: choosing input type.
+
+        if input_type == "1":
+
+            print("\nPlease enter a string to be encrypted: ")
+            message = input() #SECOND INPUT FOR THE PROGRAM: plaintext message.
+            output_file.write("\nPlaintext message is: "+message+"\n")
+
+        elif input_type == "2":
+
+            input_file = open("input_text.txt",'r') #open input test file to read.
+            message = input_file.read().splitlines()
+            count = 1
+            
+            #getting plaintext messages line by line in input test file.
+            for msg in message:
+                print("\nMessage " ,str(count)," in input.txt file: ",msg)
+                output_file.write("\nPlaintext message "+str(count) +" is: "+msg)
+                count +=1
+                
+            input_file.close()
+
+        elif input_type == "3":
+            break
+
+        else:
+            print("\nPlease enter valid number.")
+            continue
+
+
+        print("\nPlease choose a ciphering mode:\n1 ECB\n2 CBC\n3 Exit program")
+        cipher_mode = input() #THIRD INPUT OF THE PROGRAM: choosing the ciphering mode.
 
         if cipher_mode == "1":
 
         # # ECB
             #encryption of the message.
-            cipher_text = ECB_encrypt(message, g_power_ab)
-            print("We used ECB cipher mode to break up the message, into smaller parts, and encrypt every part individually")
-            print("This is our encrypted message: ", cipher_text, "\n")
+            print("\nWe used ECB cipher mode to break up the message, into smaller parts, and encrypt every part individually")
+            output_file.write("\n\nWe used ECB cipher mode to break up the message, into smaller parts, and encrypt every part individually\n")
 
-            #decryption of the message.
-            plain_text = ECB_decrypt(cipher_text, g_power_ab)
-            dmsg = ''.join(plain_text)
-            print("This is our decrypted message: ", dmsg)
+            
+            for msg in message:
+                #checking if message is string or list. If it is string, then it means it is keyboard input, if it is list, then it is .txt file input.
+                if type(message) == str:
+                    msg = message
+                
+                cipher_text = ECB_encrypt(msg, g_power_ab)
+
+                print("\nThis is our encrypted message: ", cipher_text)
+                output_file.write("\nThis is our encrypted message: "+ str(cipher_text))
+
+                #decryption of the message.
+                plain_text = ECB_decrypt(cipher_text, g_power_ab)
+                dmsg = ''.join(plain_text)
+
+                print("This is our decrypted message: ", dmsg)
+                output_file.write("\nThis is our decrypted message: "+ dmsg+"\n")
+
+                if msg == message:
+                    break
+
             break
 
         elif cipher_mode == '2':
@@ -185,23 +242,37 @@ def main():
         # # CBC
             #declaring initialization vector as random. 
             iv = random.randint(1, 2000000)
+
             #encryption of the message.
-            cipher_text = CBC_encrypt(message, g_power_ab, iv)
+            print("\nWe used CBC cipher mode to break up the message, into smaller parts, and encrypt every part individually")
+            output_file.write("\n\nWe used CBC cipher mode to break up the message, into smaller parts, and encrypt every part individually\n")
+            
+            #checking if message is string or list. If it is string, then it means it is keyboard input, if it is list, then it is .txt file input.
+            for msg in message:
+                if type(message) == str:
+                    msg= message
+                
+                cipher_text = CBC_encrypt(msg, g_power_ab, iv)
 
-            print("We used CBC cipher mode to break up the message, into smaller parts, and encrypt every part individually")
-            print("This is our encrypted message: ", cipher_text, "\n")
+                print("\nThis is our encrypted message: ", cipher_text)
+                output_file.write("\nThis is our encrypted message: "+ str(cipher_text))
 
-            #decryption of the message.
-            plain_text = CBC_decrypt(cipher_text, g_power_ab, iv)
-            dmsg = ''.join(plain_text)
-            print("This is our decrypted message: ",dmsg)
+                #decryption of the message.
+                plain_text = CBC_decrypt(cipher_text, g_power_ab, iv)
+                dmsg = ''.join(plain_text)
+
+                print("This is our decrypted message: ",dmsg)
+                output_file.write("\nThis is our decrypted message: "+dmsg+"\n")
+
+                if msg == message:
+                    break
             break
 
         elif cipher_mode == '3':
             break
         else:
             print("Please enter 1 or 2 to choose a ciphering mode.\n")
-            
+    output_file.close()           
 
 if __name__ == "__main__":
     main()
