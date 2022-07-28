@@ -1,7 +1,7 @@
 # Elgamal-Algorithm
 
 Project was made by me and my collegue @yhasansenyurt, both students of the Warsaw University of Technology (Politechnika Warszawska)
-during our students exchange period. 
+during our student exchange period. 
 
  This project concerns the ElGamal cipher. ElGamal cryptosystem can be defined as the cryptography
     algorithm that uses the public and private key concepts to secure communication between two systems. It
